@@ -56,6 +56,10 @@ configure(ibrowse, _Options) ->
   start_link(vhs_ibrowse),
   vhs_ibrowse:configure(),
   ok;
+configure(hackney, _Options) ->
+  start_link(vhs_hackney),
+  vhs_hackney:configure(),
+  ok;
 configure(_, _) ->
   throw(adapter_not_supported).
 
