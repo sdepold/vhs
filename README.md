@@ -2,26 +2,38 @@
 
 VHS is a webmocking framework for Erlang inspired by (Ruby's vcr
 gem)[https://github.com/vcr/vcr]. In the moment it only supports the
-(ibrowse http client)[https://github.com/cmullaparthi/ibrowse], but support for other
-libraries should be easy to add.
+(ibrowse http client)[https://github.com/cmullaparthi/ibrowse] and [hackney](https://github.com/benoitc/hackney),
+but support for other libraries should be easy to add.
 
 # Show me the code
 
 ```erlang
-  ibrowse:start(),
-  vhs:configure(ibrowse, []),
-  vhs:use_cassette(doc_domain_test,
-                   fun() ->
-                       Response = ibrowse:send_req("http://www.iana.org/domains/example",
-                                                   [],
-                                                   get),
+ibrowse:start(),
+vhs:configure(ibrowse, []),
+vhs:use_cassette(doc_domain_test, fun() ->
+    Response = ibrowse:send_req("http://www.iana.org/domains/example", [], get),
 
-                       %% Uses the same structure of the mocked library.
-                       {ok, Status, _Headers, Body} = Response,
-                       ?assert_equal(Status, "200"),
-                       ?assert(contains(Body, "Example Domain"))
-                   end),
+    %% Uses the same structure of the mocked library.
+    {ok, Status, _Headers, Body} = Response,
+    ?assert_equal(Status, "200"),
+    ?assert(contains(Body, "Example Domain"))
+end).
+```
 
+Or for hackney:
+
+```erlang
+hackney:start(),
+vhs:configure(hackney, []),
+vhs:use_cassette(hackney_test, fun() ->
+    Response = hackney:get("http://www.iana.org/domains/example"),
+
+    %% Uses the same structure of the mocked library.
+    {ok, StatusCode, Headers, ClientRef} = Response,
+    Body = hackney:body(ClientRef),
+    ?assert_equal(Status, 200),
+    ?assert(contains(Body, "Example Domain"))
+end).
 ```
 
 # How does it work?
